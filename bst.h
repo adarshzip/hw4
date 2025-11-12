@@ -442,9 +442,35 @@ Value const & BinarySearchTree<Key, Value>::operator[](const Key& key) const
 * overwrite the current value with the updated value.
 */
 template<class Key, class Value>
-void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &keyValuePair)
+void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &keyValuePair) // FINISHED
 {
-    // TODO
+    if (root_ == nullptr){
+        root_ = new Node<Key, Value>(keyValuePair.first, keyValuePair.second, nullptr);
+    }
+    else{
+        Node<Key, Value>* active = root_; 
+        Key aKey = keyValuePair.first; 
+        while (true){
+            if (active->getLeft() == nullptr && aKey < active->getKey()){
+                active->setLeft(new Node<Key, Value>(keyValuePair.first, keyValuePair.second, active)); 
+                break;
+            }
+            else if (active->getRight() == nullptr && aKey > active->getKey()){
+                active->setRight(new Node<Key, Value>(keyValuePair.first, keyValuePair.second, active)); 
+                break;
+            }
+            else if (active->getLeft() != nullptr && aKey < active->getKey()){
+                active = active->getLeft(); 
+            }
+            else if (active->getRight() != nullptr && aKey > active->getKey()){
+                active = active->getRight(); 
+            }
+            else {
+                active->setValue(keyValuePair.second);
+                break;
+            }
+        }
+    }
 }
 
 
@@ -463,7 +489,7 @@ void BinarySearchTree<Key, Value>::remove(const Key& key)
 
 template<class Key, class Value>
 Node<Key, Value>*
-BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
+BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) // FINISHED
 {
     if (current == nullptr){
         return nullptr; 
@@ -505,7 +531,7 @@ void BinarySearchTree<Key, Value>::clear()
 */
 template<typename Key, typename Value>
 Node<Key, Value>*
-BinarySearchTree<Key, Value>::getSmallestNode() const
+BinarySearchTree<Key, Value>::getSmallestNode() const // FINISHED
 {
     Node<Key, Value>* activeNode = root_; 
     while (true){

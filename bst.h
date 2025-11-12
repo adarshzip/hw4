@@ -465,9 +465,29 @@ template<class Key, class Value>
 Node<Key, Value>*
 BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current)
 {
-    // TODO
-}
+    if (current == nullptr){
+        return nullptr; 
+    }
+    
+    if (current->getLeft() != nullptr){
+        Node<Key, Value>* active = current->getLeft(); 
+        while (active->getRight() != nullptr){
+            active = active->getRight(); 
+        }
+        return active; 
+    }
+    else {
+        Node<Key, Value>* child = current;
+        Node<Key, Value>* parent = current->getParent();
 
+        while (parent != nullptr && parent->getLeft() == child) {
+            child = parent;
+            parent = parent->getParent();
+        }
+
+        return parent; 
+    }
+}
 
 /**
 * A method to remove all contents of the tree and
@@ -487,7 +507,18 @@ template<typename Key, typename Value>
 Node<Key, Value>*
 BinarySearchTree<Key, Value>::getSmallestNode() const
 {
-    // TODO
+    Node<Key, Value>* activeNode = root_; 
+    while (true){
+        if (activeNode == nullptr){
+            return NULL; 
+        }
+        if (activeNode->getLeft() != nullptr){
+            activeNode = activeNode->getLeft(); 
+        }
+        else {
+            return activeNode; 
+        }
+    }
 }
 
 /**

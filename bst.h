@@ -496,9 +496,24 @@ BinarySearchTree<Key, Value>::getSmallestNode() const
 * exists
 */
 template<typename Key, typename Value>
-Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) const
+Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) const // FINISHED
 {
-    // TODO
+    Node<Key, Value>* activeNode = root_; 
+    while (true){
+        if (activeNode == nullptr){
+            return NULL; 
+        }
+        Value activeKey = activeNode->getKey(); 
+        if (key == activeKey){
+            return activeNode; 
+        }
+        else if (key < activeKey){
+            activeNode = activeNode->getLeft(); 
+        }
+        else {
+            activeNode = activeNode->getRight();
+        }
+    }
 }
 
 /**

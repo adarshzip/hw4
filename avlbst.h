@@ -342,44 +342,193 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
 template<class Key, class Value>
 void AVLTree<Key, Value>:: remove(const Key& key)
 {
-     Node<Key, Value>* foundKey = internalFind(key);
+     AVLNode<Key, Value>* foundKey = static_cast<AVLNode<Key, Value>*>(this->internalFind(key));
 
-    if (foundKey == nullptr) { // empty case
+    if (foundKey == nullptr) {
         return;
     }
 
-    if (foundKey->getLeft() != nullptr && foundKey->getRight() != nullptr) { // two child case, swap and then no longer two child
-        Node<Key, Value>* pred = predecessor(foundKey);
-        nodeSwap(foundKey, pred);
+    if (foundKey->getLeft() != nullptr && foundKey->getRight() != nullptr) {
+        AVLNode<Key, Value>* pred = static_cast<AVLNode<Key, Value>*>(this->predecessor(foundKey));
+        this->nodeSwap(foundKey, pred);
     }
 
-    Node<Key, Value>* child = nullptr; // child since will only have one or zero child
+    AVLNode<Key, Value>* child = nullptr;
     if (foundKey->getLeft() != nullptr) {
         child = foundKey->getLeft();
     } else {
         child = foundKey->getRight();
     }
 
-    Node<Key, Value>* parent = foundKey->getParent();
+    AVLNode<Key, Value>* parent = foundKey->getParent();
+    int8_t diff = 0;
 
-    if (parent == nullptr) { // root case
-        root_ = child;
+    if (parent == nullptr) {
+        this->root_ = child;
     }
-    else { // not root
+    else {
         if (parent->getLeft() == foundKey) {
             parent->setLeft(child);
+            diff = 1;
         } else {
             parent->setRight(child);
+            diff = -1;
         }
     }
 
-    if (child != nullptr) { // sets child up
+    if (child != nullptr) {
         child->setParent(parent);
     }
 
     delete foundKey;
 
-    
+    AVLNode<Key, Value>* curr = parent;
+    while (curr != nullptr) {
+        curr->updateBalance(diff);
+
+        if (curr->getBalance() == 1 || curr->getBalance() == -1) {
+            break; 
+        }
+
+        if (curr->getBalance() == 2) { // Right-heavy
+            AVLNode<Key, Value>* c = curr->getRight(); // child
+            
+            // RR Case (or R0 case)
+            if (c->getBalance() == 1 || c->getBalance() == 0) {
+                AVLNode<Key, Value>* z = curr;
+                // --- Left Rotation on z ---
+                z->setRight(c->getLeft());
+                if (z->getRight() != nullptr){
+                    z->getRight()->setParent(z);
+                }
+                c->setLeft(z); 
+
+                if(z->getParent() == nullptr){
+                    c->setParent(nullptr);
+                    this->root_ = c;
+                }
+                else {
+                    c->setParent(z->getParent());
+                    if (c->getParent()->getLeft() == z){
+                        c->getParent()->setLeft(c);
+                    }
+                    else {
+                        c->getParent()->setRight(c);
+                    }
+                }
+                z->setParent(c);
+                
+                // --- Update Balances (Remove specific) ---
+                if (c->getBalance() == 0) {
+                    z->setBalance(1);
+                    c->setBalance(-1);
+                    break; // Height stabilized
+                } else {
+                    z->setBalance(0);
+                    c->setBalance(0);
+                }
+            } 
+            else { // RL Case (c->getBalance() == -1)
+                AVLNode<Key, Value>* z = curr;
+                AVLNode<Key, Value>* g = c->getLeft(); // grandchild
+                // --- Right Rotation on c ---
+                c->setLeft(g->getRight());
+                if (c->getLeft() != nullptr) { c->getLeft()->setParent(c); }
+                g->setRight(c);
+                c->setParent(g);
+                // --- Left Rotation on z ---
+                z->setRight(g);
+                g->setParent(z); 
+                // --- Link to Grandparent ---
+                g->setParent(z->getParent());
+                if (g->getParent() == nullptr) { this->root_ = g; }
+                else {
+                    if (g->getParent()->getLeft() == z) g->getParent()->setLeft(g);
+                    else g->getParent()->setRight(g);
+                }
+                z->setParent(g);
+                // --- Update Balances ---
+                if (g->getBalance() == -1) { z->setBalance(0); c->setBalance(1); }
+                else if (g->getBalance() == 1) { z->setBalance(-1); c->setBalance(0); }
+                else { z->setBalance(0); c->setBalance(0); }
+                g->setBalance(0);
+            }
+        } 
+        else if (curr->getBalance() == -2) { // Left-heavy
+            AVLNode<Key, Value>* c = curr->getLeft(); // child
+            
+            // LL Case (or L0 case)
+            if (c->getBalance() == -1 || c->getBalance() == 0) {
+                AVLNode<Key, Value>* z = curr;
+                // --- Right Rotation on z ---
+                z->setLeft(c->getRight());
+                if (z->getLeft() != nullptr){
+                    z->getLeft()->setParent(z);
+                }
+                c->setRight(z); 
+
+                if(z->getParent() == nullptr){
+                    c->setParent(nullptr);
+                    this->root_ = c;
+                }
+                else {
+                    c->setParent(z->getParent());
+                    if (z->getParent()->getLeft() == z){
+                        c->getParent()->setLeft(c);
+                    }
+                    else {
+                        c->getParent()->setRight(c);
+                    }
+                }
+                z->setParent(c);
+
+                // --- Update Balances (Remove specific) ---
+                if (c->getBalance() == 0) {
+                    z->setBalance(-1);
+                    c->setBalance(1);
+                    break; // Height stabilized
+                } else {
+                    z->setBalance(0);
+                    c->setBalance(0);
+                }
+            } 
+            else { // LR Case (c->getBalance() == 1)
+                AVLNode<Key, Value>* z = curr;
+                AVLNode<Key, Value>* g = c->getRight(); // grandchild
+                // --- Left Rotation on c ---
+                c->setRight(g->getLeft());
+                if (c->getRight() != nullptr) { c->getRight()->setParent(c); }
+                g->setLeft(c);
+                c->setParent(g);
+                // --- Right Rotation on z ---
+                z->setLeft(g);
+                g->setParent(z);
+                // --- Link to Grandparent ---
+                g->setParent(z->getParent());
+                if (g->getParent() == nullptr) { this->root_ = g; }
+                else {
+                    if (g->getParent()->getLeft() == z) g->getParent()->setLeft(g);
+                    else g->getParent()->setRight(g);
+                }
+                z->setParent(g);
+                // --- Update Balances ---
+                if (g->getBalance() == 1) { z->setBalance(0); c->setBalance(-1); }
+                else if (g->getBalance() == -1) { z->setBalance(1); c->setBalance(0); }
+                else { z->setBalance(0); c->setBalance(0); }
+                g->setBalance(0);
+            }
+        }
+
+        AVLNode<Key, Value>* nextParent = curr->getParent();
+        if (nextParent != nullptr) {
+            if (nextParent->getLeft() == curr) {
+                diff = 1;
+            } else {
+                diff = -1;
+            }
+        }
+        curr = nextParent;
+    }
 }
 
 template<class Key, class Value>

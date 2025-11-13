@@ -248,7 +248,7 @@ protected:
 
     // Add helper functions here
     void clearHelper(Node<Key, Value>* node); 
-    int balanceHelper(Node<Key, Value>* node); 
+    int balanceHelper(Node<Key, Value>* node) const; 
 
 protected:
     Node<Key, Value>* root_;
@@ -652,7 +652,7 @@ Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) con
     HELPER FOR BALANCE
 */
 template<typename Key, typename Value>
-int balanceHelper(Node<Key, Value>* node) {
+int BinarySearchTree<Key, Value>::balanceHelper(Node<Key, Value>* node) const {
     if (node == nullptr){ // empty node
         return 0; 
     }

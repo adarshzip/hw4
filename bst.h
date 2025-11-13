@@ -266,7 +266,7 @@ Begin implementations for the BinarySearchTree::iterator class.
 template<class Key, class Value>
 BinarySearchTree<Key, Value>::iterator::iterator(Node<Key,Value> *ptr)
 {
-    // TODO
+    current_ = ptr; 
 }
 
 /**
@@ -275,8 +275,7 @@ BinarySearchTree<Key, Value>::iterator::iterator(Node<Key,Value> *ptr)
 template<class Key, class Value>
 BinarySearchTree<Key, Value>::iterator::iterator() 
 {
-    // TODO
-
+    current_ = NULL; 
 }
 
 /**
@@ -308,7 +307,12 @@ bool
 BinarySearchTree<Key, Value>::iterator::operator==(
     const BinarySearchTree<Key, Value>::iterator& rhs) const
 {
-    // TODO
+    if (current_ == rhs.current_){
+        return true; 
+    }
+    else {
+        return false;
+    }
 }
 
 /**
@@ -320,8 +324,7 @@ bool
 BinarySearchTree<Key, Value>::iterator::operator!=(
     const BinarySearchTree<Key, Value>::iterator& rhs) const
 {
-    // TODO
-
+    return current_ != rhs.current_; 
 }
 
 
@@ -332,8 +335,25 @@ template<class Key, class Value>
 typename BinarySearchTree<Key, Value>::iterator&
 BinarySearchTree<Key, Value>::iterator::operator++()
 {
-    // TODO
+    if (current_->getRight() != nullptr) { // has a child
+        current_ = current_->getRight();
+        while (current_->getLeft() != nullptr) {
+            current_ = current_->getLeft();
+        }
+    }
+    else { // does not have a child
+        Node<Key, Value>* child = current_;
+        Node<Key, Value>* parent = current_->getParent();
 
+        while (parent != nullptr && parent->getRight() == child) {
+            child = parent;
+            parent = parent->getParent();
+        }
+
+        current_ = parent;
+    }
+
+    return *this;
 }
 
 
@@ -482,7 +502,42 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<const Key, Value> &key
 template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::remove(const Key& key)
 {
-    // TODO
+    Node<Key, Value>* foundKey = internalFind(key);
+
+    if (foundKey == nullptr) { // empty case
+        return;
+    }
+
+    if (foundKey->getLeft() != nullptr && foundKey->getRight() != nullptr) { // two child case, swap and then no longer two child
+        Node<Key, Value>* pred = predecessor(foundKey);
+        nodeSwap(foundKey, pred);
+    }
+
+    Node<Key, Value>* child = nullptr; // child since will only have one or zero child
+    if (foundKey->getLeft() != nullptr) {
+        child = foundKey->getLeft();
+    } else {
+        child = foundKey->getRight();
+    }
+
+    Node<Key, Value>* parent = foundKey->getParent();
+
+    if (parent == nullptr) { // root case
+        root_ = child;
+    }
+    else { // not root
+        if (parent->getLeft() == foundKey) {
+            parent->setLeft(child);
+        } else {
+            parent->setRight(child);
+        }
+    }
+
+    if (child != nullptr) { // sets child up
+        child->setParent(parent);
+    }
+
+    delete foundKey;
 }
 
 

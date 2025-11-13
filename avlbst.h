@@ -179,20 +179,24 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
         }
     }
     
-    while(activeTraverser->getParent() != nullptr){
-        if (activeTraverser->getParent()->getLeft() == activeTraverser){
-            activeTraverser = activeTraverser->getParent(); 
-            activeTraverser->setBalance(activeTraverser->getBalance() - 1);
-        }
-        else {
-            activeTraverser = activeTraverser->getParent(); 
-            activeTraverser->setBalance(activeTraverser->getBalance() + 1);
+    AVLNode<Key, Value>* child = activeTraverser;
+    AVLNode<Key, Value>* parent = child->getParent();
+
+    while (parent != nullptr) {
+        
+        if (parent->getLeft() == child) {
+            parent->setBalance(parent->getBalance() - 1);
+        } else {
+            parent->setBalance(parent->getBalance() + 1);
         }
 
-        if (activeTraverser->getBalance() == 0){
-            break; // tree is balanced yippee!
+        if (parent->getBalance() == 0) {
+            break; 
         }
-        else if (activeTraverser->getBalance() == 2){ // heavier right side
+
+        AVLNode<Key, Value>* activeTraverser = parent;
+
+        if (activeTraverser->getBalance() == 2){ // heavier right side
             int rChild = activeTraverser->getRight()->getBalance(); 
             if (rChild == 1) { // RR rotation
                 AVLNode<Key, Value>* child = activeTraverser->getRight();
@@ -214,7 +218,6 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     else {
                         child->getParent()->setRight(child);
                     }
-                    
                 }
                 activeTraverser->setParent(child);
                 activeTraverser->setBalance(0);
@@ -230,8 +233,8 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
 
                 g->setLeft(z);
                 g->setRight(c);
-                z->setRight(t2); // z's new right child is t2
-                c->setLeft(t3);  // c's new left child is t3
+                z->setRight(t2);
+                c->setLeft(t3); 
 
                 if (t2 != nullptr) { t2->setParent(z); }
                 if (t3 != nullptr) { t3->setParent(c); }
@@ -252,6 +255,7 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                 else { z->setBalance(0); c->setBalance(0); }
                 g->setBalance(0);
             }
+            break; // A rotation always finishes the balancing for insert
         }
         else if (activeTraverser->getBalance() == -2){ // heavier left side
             int lChild = activeTraverser->getLeft()->getBalance(); 
@@ -265,8 +269,8 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
 
                 g->setLeft(c);
                 g->setRight(z);
-                c->setRight(t2); // c's new right child is t2
-                z->setLeft(t3);  // z's new left child is t3
+                c->setRight(t2);
+                z->setLeft(t3); 
 
                 if (t2 != nullptr) { t2->setParent(c); }
                 if (t3 != nullptr) { t3->setParent(z); }
@@ -307,13 +311,16 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     else {
                         child->getParent()->setRight(child);
                     }
-                    
                 }
                 activeTraverser->setParent(child);
                 activeTraverser->setBalance(0);
                 child->setBalance(0); 
             }
+            break; /
         }
+
+        child = parent;
+        parent = parent->getParent();
     }
 }
 

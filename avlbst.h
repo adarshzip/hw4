@@ -175,7 +175,7 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
         }
         else {
             active->setValue(new_item.second);
-            break;
+            return;
         }
     }
     

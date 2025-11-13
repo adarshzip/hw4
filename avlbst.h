@@ -194,7 +194,7 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
         }
         else if (activeTraverser->getBalance() == 2){ // heavier right side
             int rChild = activeTraverser->getRight()->getBalance(); 
-            if (rChild == 1) { // LL rotation
+            if (rChild == 1) { // RR rotation
                 AVLNode<Key, Value>* child = activeTraverser->getRight();
                 activeTraverser->setRight(child->getLeft());
                 if (activeTraverser->getRight() != nullptr){
@@ -223,43 +223,33 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                 AVLNode<Key, Value>* z = activeTraverser;
                 AVLNode<Key, Value>* c = z->getRight();
                 AVLNode<Key, Value>* g = c->getLeft();
+                
+                AVLNode<Key, Value>* t2 = g->getLeft();
+                AVLNode<Key, Value>* t3 = g->getRight();
 
-                c->setLeft(g->getRight());
-                if (c->getLeft() != nullptr) {
-                    c->getLeft()->setParent(c);
-                }
+                g->setLeft(z);
                 g->setRight(c);
-                c->setParent(g);
+                z->setRight(t2); // z's new right child is t2
+                c->setLeft(t3);  // c's new left child is t3
 
-                z->setRight(g);
-                g->setParent(z); 
+                if (t2 != nullptr) { t2->setParent(z); }
+                if (t3 != nullptr) { t3->setParent(c); }
 
                 g->setParent(z->getParent());
                 if (g->getParent() == nullptr) {
                     this->root_ = g;
+                } else {
+                    if (g->getParent()->getLeft() == z) g->getParent()->setLeft(g);
+                    else g->getParent()->setRight(g);
                 }
-                else {
-                    if (g->getParent()->getLeft() == z) {
-                        g->getParent()->setLeft(g);
-                    } else {
-                        g->getParent()->setRight(g);
-                    }
-                }
-
+                
                 z->setParent(g);
-                c->setParent(g); // c's parent was already set to g
+                c->setParent(g);
 
-                if (g->getBalance() == -1) { // g was left-heavy
-                    z->setBalance(0);
-                    c->setBalance(1);
-                } else if (g->getBalance() == 1) { // g was right-heavy
-                    z->setBalance(-1);
-                    c->setBalance(0);
-                } else { // g was 0 (the new node itself)
-                    z->setBalance(0);
-                    c->setBalance(0);
-                }
-                g->setBalance(0); // The new root of this subtree is now balanced
+                if (g->getBalance() == -1) { z->setBalance(0); c->setBalance(1); }
+                else if (g->getBalance() == 1) { z->setBalance(-1); c->setBalance(0); }
+                else { z->setBalance(0); c->setBalance(0); }
+                g->setBalance(0);
             }
         }
         else if (activeTraverser->getBalance() == -2){ // heavier left side
@@ -268,45 +258,35 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                 AVLNode<Key, Value>* z = activeTraverser;
                 AVLNode<Key, Value>* c = z->getLeft();
                 AVLNode<Key, Value>* g = c->getRight();
+                
+                AVLNode<Key, Value>* t2 = g->getLeft();
+                AVLNode<Key, Value>* t3 = g->getRight();
 
-                c->setRight(g->getLeft());
-                if (c->getRight() != nullptr) {
-                    c->getRight()->setParent(c);
-                }
                 g->setLeft(c);
-                c->setParent(g);
+                g->setRight(z);
+                c->setRight(t2); // c's new right child is t2
+                z->setLeft(t3);  // z's new left child is t3
 
-                z->setLeft(g);
-                g->setParent(z); 
+                if (t2 != nullptr) { t2->setParent(c); }
+                if (t3 != nullptr) { t3->setParent(z); }
 
                 g->setParent(z->getParent());
                 if (g->getParent() == nullptr) {
-                    this->root_ = g; // g is the new root of the whole tree
-                } 
-                else {
-                    if (g->getParent()->getLeft() == z) {
-                        g->getParent()->setLeft(g);
-                    } else {
-                        g->getParent()->setRight(g);
-                    }
+                    this->root_ = g;
+                } else {
+                    if (g->getParent()->getLeft() == z) g->getParent()->setLeft(g);
+                    else g->getParent()->setRight(g);
                 }
 
                 z->setParent(g);
-                c->setParent(g); // c's parent was already set to g
+                c->setParent(g);
 
-                if (g->getBalance() == 1) { // g was right-heavy
-                    z->setBalance(0);
-                    c->setBalance(-1);
-                } else if (g->getBalance() == -1) { // g was left-heavy
-                    z->setBalance(1);
-                    c->setBalance(0);
-                } else { // g was 0 (the new node itself)
-                    z->setBalance(0);
-                    c->setBalance(0);
-                }
-                g->setBalance(0); // The new root of this subtree is now balanced
+                if (g->getBalance() == 1) { z->setBalance(0); c->setBalance(-1); }
+                else if (g->getBalance() == -1) { z->setBalance(1); c->setBalance(0); }
+                else { z->setBalance(0); c->setBalance(0); }
+                g->setBalance(0);
             }
-            else { // RR rotation
+            else { // LL rotation
                 AVLNode<Key, Value>* child = activeTraverser->getLeft();
                 activeTraverser->setLeft(child->getRight());
                 if (activeTraverser->getLeft() != nullptr){
@@ -320,11 +300,11 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                 }
                 else {
                     child->setParent(activeTraverser->getParent());
-                    if (child->getParent()->getRight() == activeTraverser){
+                    if (child->getParent()->getLeft() == activeTraverser){
                         child->getParent()->setLeft(child);
                     }
                     else {
-                        child->getParent()->setLeft(child);
+                        child->getParent()->setRight(child);
                     }
                     activeTraverser->setParent(child);
                 }
@@ -393,10 +373,8 @@ void AVLTree<Key, Value>:: remove(const Key& key)
         if (curr->getBalance() == 2) { // Right-heavy
             AVLNode<Key, Value>* c = curr->getRight(); // child
             
-            // RR Case (or R0 case)
             if (c->getBalance() == 1 || c->getBalance() == 0) {
                 AVLNode<Key, Value>* z = curr;
-                // --- Left Rotation on z ---
                 z->setRight(c->getLeft());
                 if (z->getRight() != nullptr){
                     z->getRight()->setParent(z);
@@ -418,7 +396,6 @@ void AVLTree<Key, Value>:: remove(const Key& key)
                 }
                 z->setParent(c);
                 
-                // --- Update Balances (Remove specific) ---
                 if (c->getBalance() == 0) {
                     z->setBalance(1);
                     c->setBalance(-1);
@@ -428,18 +405,18 @@ void AVLTree<Key, Value>:: remove(const Key& key)
                     c->setBalance(0);
                 }
             } 
-            else { // RL Case (c->getBalance() == -1)
+            else { // RL Case
                 AVLNode<Key, Value>* z = curr;
                 AVLNode<Key, Value>* g = c->getLeft(); // grandchild
-                // --- Right Rotation on c ---
+
                 c->setLeft(g->getRight());
                 if (c->getLeft() != nullptr) { c->getLeft()->setParent(c); }
                 g->setRight(c);
                 c->setParent(g);
-                // --- Left Rotation on z ---
+
                 z->setRight(g);
                 g->setParent(z); 
-                // --- Link to Grandparent ---
+
                 g->setParent(z->getParent());
                 if (g->getParent() == nullptr) { this->root_ = g; }
                 else {
@@ -447,7 +424,7 @@ void AVLTree<Key, Value>:: remove(const Key& key)
                     else g->getParent()->setRight(g);
                 }
                 z->setParent(g);
-                // --- Update Balances ---
+
                 if (g->getBalance() == -1) { z->setBalance(0); c->setBalance(1); }
                 else if (g->getBalance() == 1) { z->setBalance(-1); c->setBalance(0); }
                 else { z->setBalance(0); c->setBalance(0); }

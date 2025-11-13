@@ -657,8 +657,8 @@ int BinarySearchTree<Key, Value>::balanceHelper(Node<Key, Value>* node) const {
         return 0; 
     }
 
-    int left = balanceHelper(node->left); 
-    int right = balanceHelper(node->right);
+    int left = balanceHelper(node->getLeft()); 
+    int right = balanceHelper(node->getRight());
 
     if (left == -1 || right == -1){
         return -1; 

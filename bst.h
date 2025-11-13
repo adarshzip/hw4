@@ -247,7 +247,8 @@ protected:
     virtual void nodeSwap( Node<Key,Value>* n1, Node<Key,Value>* n2) ;
 
     // Add helper functions here
-
+    void clearHelper(Node<Key, Value>* node); 
+    int balanceHelper(Node<Key, Value>* node); 
 
 protected:
     Node<Key, Value>* root_;
@@ -375,14 +376,14 @@ Begin implementations for the BinarySearchTree class.
 template<class Key, class Value>
 BinarySearchTree<Key, Value>::BinarySearchTree() 
 {
-    // TODO
+    root_ = NULL; 
+
 }
 
 template<typename Key, typename Value>
 BinarySearchTree<Key, Value>::~BinarySearchTree()
 {
-    // TODO
-
+    clear();
 }
 
 /**
@@ -570,6 +571,23 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) // FINISHED
     }
 }
 
+/*
+HELPER METHOD FOR CLEAR. 
+*/
+template<typename Key, typename Value>
+void BinarySearchTree<Key, Value>::clearHelper(Node<Key, Value>* node)
+{
+    if (node == nullptr){
+        return; 
+    }
+    else{
+        clearHelper(node->getLeft());
+        clearHelper(node->getRight()); 
+        delete node; 
+    }
+}
+
+
 /**
 * A method to remove all contents of the tree and
 * reset the values in the tree for use again.
@@ -577,7 +595,8 @@ BinarySearchTree<Key, Value>::predecessor(Node<Key, Value>* current) // FINISHED
 template<typename Key, typename Value>
 void BinarySearchTree<Key, Value>::clear()
 {
-    // TODO
+    clearHelper(root_); 
+    root_ = nullptr;
 }
 
 
@@ -628,13 +647,53 @@ Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) con
     }
 }
 
+
+/*
+    HELPER FOR BALANCE
+*/
+template<typename Key, typename Value>
+int balanceHelper(Node<Key, Value>* node) {
+    if (node == nullptr){ // empty node
+        return 0; 
+    }
+
+    int left = balanceHelper(node->left); 
+    int right = balanceHelper(node->right);
+
+    if (left == -1 || right == -1){
+        return -1; 
+    }
+
+    if ((left != 0 || right != 0) && abs(left - right) > 1){
+        return -1; 
+    }
+    else {
+        if(left > right){
+            return 1 + left;
+        }
+        else {
+            return 1 + right; 
+        }
+    }
+}
+
+
 /**
  * Return true iff the BST is balanced.
  */
 template<typename Key, typename Value>
 bool BinarySearchTree<Key, Value>::isBalanced() const
 {
-    // TODO
+    if (root_ == nullptr){
+        return true; 
+    }
+    
+    if (balanceHelper(root_) == -1){
+        return false; 
+    }
+    else {
+        return true; 
+    }
 }
 
 

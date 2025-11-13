@@ -214,8 +214,9 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     else {
                         child->getParent()->setRight(child);
                     }
-                    activeTraverser->setParent(child);
+                    
                 }
+                activeTraverser->setParent(child);
                 activeTraverser->setBalance(0);
                 child->setBalance(0); 
             }
@@ -306,8 +307,9 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                     else {
                         child->getParent()->setRight(child);
                     }
-                    activeTraverser->setParent(child);
+                    
                 }
+                activeTraverser->setParent(child);
                 activeTraverser->setBalance(0);
                 child->setBalance(0); 
             }
@@ -437,7 +439,7 @@ void AVLTree<Key, Value>:: remove(const Key& key)
             // LL Case (or L0 case)
             if (c->getBalance() == -1 || c->getBalance() == 0) {
                 AVLNode<Key, Value>* z = curr;
-                // --- Right Rotation on z ---
+
                 z->setLeft(c->getRight());
                 if (z->getLeft() != nullptr){
                     z->getLeft()->setParent(z);
@@ -459,7 +461,6 @@ void AVLTree<Key, Value>:: remove(const Key& key)
                 }
                 z->setParent(c);
 
-                // --- Update Balances (Remove specific) ---
                 if (c->getBalance() == 0) {
                     z->setBalance(-1);
                     c->setBalance(1);
@@ -472,15 +473,15 @@ void AVLTree<Key, Value>:: remove(const Key& key)
             else { // LR Case (c->getBalance() == 1)
                 AVLNode<Key, Value>* z = curr;
                 AVLNode<Key, Value>* g = c->getRight(); // grandchild
-                // --- Left Rotation on c ---
+
                 c->setRight(g->getLeft());
                 if (c->getRight() != nullptr) { c->getRight()->setParent(c); }
                 g->setLeft(c);
                 c->setParent(g);
-                // --- Right Rotation on z ---
+
                 z->setLeft(g);
                 g->setParent(z);
-                // --- Link to Grandparent ---
+
                 g->setParent(z->getParent());
                 if (g->getParent() == nullptr) { this->root_ = g; }
                 else {
@@ -488,7 +489,7 @@ void AVLTree<Key, Value>:: remove(const Key& key)
                     else g->getParent()->setRight(g);
                 }
                 z->setParent(g);
-                // --- Update Balances ---
+
                 if (g->getBalance() == 1) { z->setBalance(0); c->setBalance(-1); }
                 else if (g->getBalance() == -1) { z->setBalance(1); c->setBalance(0); }
                 else { z->setBalance(0); c->setBalance(0); }

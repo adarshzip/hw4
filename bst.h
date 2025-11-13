@@ -634,7 +634,7 @@ Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) con
         if (activeNode == nullptr){
             return NULL; 
         }
-        Value activeKey = activeNode->getKey(); 
+        Key activeKey = activeNode->getKey(); 
         if (key == activeKey){
             return activeNode; 
         }

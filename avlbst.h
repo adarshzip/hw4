@@ -316,7 +316,7 @@ void AVLTree<Key, Value>::insert (const std::pair<const Key, Value> &new_item)
                 activeTraverser->setBalance(0);
                 child->setBalance(0); 
             }
-            break; /
+            break;
         }
 
         child = parent;
